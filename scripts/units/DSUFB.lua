@@ -248,7 +248,14 @@ function dsu:update_contents()
     local index = self.index
 
     if item then
-        new_contents[item] = self.amount + ( self.entity.fluidbox[3].amount or 0 )
+        local fluidbox = self.entity.fluidbox
+        local fluid = fluidbox[3]
+        
+        if fluid then
+            new_contents[item] = self.amount + fluid.amount
+        else
+            new_contents[item] = self.amount
+        end
     end
 
     for name, _ in pairs( self.old_contents ) do
@@ -309,7 +316,7 @@ function dsu:check_fuel_amount()
 
     if fuel_request_amount <= self.fuel_on_the_way then return end
 
-    local fuel_depots = dsu.road_network.get_fuel_depots( self.network_id )
+    local fuel_depots = dsu.road_network.get_fuel_depots( self.network_id, self.node_position )
 
     if not ( fuel_depots and fuel_depots[1] ) then
         self:show_fuel_alert( "No fuel depots on network for request depot" )

@@ -285,7 +285,7 @@ function dsu:check_fuel_amount()
 
     if fuel_request_amount <= self.fuel_on_the_way then return end
 
-    local fuel_depots = dsu.road_network.get_fuel_depots( self.network_id )
+    local fuel_depots = dsu.road_network.get_fuel_depots( self.network_id, self.node_position )
 
     if not ( fuel_depots and fuel_depots[1] ) then
         self:show_fuel_alert( "No fuel depots on network for request depot" )

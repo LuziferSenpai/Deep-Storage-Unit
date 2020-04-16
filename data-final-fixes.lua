@@ -65,7 +65,7 @@ local create_recipe = function( item )
         icon = item.dark_background_item or item.icon,
         icon_size = item.icon_size,
         icons = item.icons,
-        ingredients = { { type = "item", name = item.name, amount = item.stack_size * 50 } },
+        ingredients = { { type = "item", name = item.name, amount = math.min( item.stack_size * 50, 65535 ) } },
         results = { { type = "item", name = item.name, amount = math.min( item.stack_size * 10, 65535 ), show_details_in_recipe_tooltip = false } },
         category = categories[1],
         order = item.order,
@@ -87,7 +87,7 @@ local create_recipe = function( item )
         {
             { type = "item", name = "transport-drone", amount = 1 },
             { type = "fluid", name = "petroleum-gas", amount = 50000, fluidbox_index = 1 },
-            { type = "item", name = item.name, amount = item.stack_size * 50 }
+            { type = "item", name = item.name, amount = math.min( item.stack_size * 50, 65535 ) }
         }
         recipe_big.results[1].amount = math.min( item.stack_size * 100, 65535 )
         recipe_big.category = categories[3]
