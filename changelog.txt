@@ -1,7 +1,20 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.0.3
+Date: 16.04.2020
+  Changes:
+    - Changed the DSU Depots so they work with the newest version of Transport Drones
+    - Adjusted fuel amount in the Depots
+  Bugfixes:
+    - Fixed a bug, where the amount of the result where over 65535
+---------------------------------------------------------------------------------------------------
+Version: 0.0.2
+Date: 12.04.2020
+  Bugfixes:
+    - Fixed bugs in the DSU Depots
+---------------------------------------------------------------------------------------------------
 Version: 0.0.1
 Date: 09.04.2020
   Features:
-    - unlimited Storage
-    - Fluid and Item Version
-    - Transport Drones Support
+    - Unlimited storage
+    - Fluid and item version
+    - Transport Drones support

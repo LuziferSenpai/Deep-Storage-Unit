@@ -66,11 +66,11 @@ local create_recipe = function( item )
         icon_size = item.icon_size,
         icons = item.icons,
         ingredients = { { type = "item", name = item.name, amount = item.stack_size * 50 } },
-        results = { { type = "item", name = item.name, amount_max = item.stack_size * 10, amount_min = 1, show_details_in_recipe_tooltip = false } },
+        results = { { type = "item", name = item.name, amount = math.min( item.stack_size * 10, 65535 ), show_details_in_recipe_tooltip = false } },
         category = categories[1],
         order = item.order,
         subgroup = get_subgroup( item ),
-        overload_multiplier = mathmin( 200, 60000 / ( item.stack_size or 1 ) ),
+        overload_multiplier = 1,
         hide_from_player_crafting = true,
         main_product = "",
         allow_decomposition = false,
@@ -86,10 +86,10 @@ local create_recipe = function( item )
         recipe_big.ingredients =
         {
             { type = "item", name = "transport-drone", amount = 1 },
-            { type = "fluid", name = "petroleum-gas", amount = 5000, fluidbox_index = 1 },
+            { type = "fluid", name = "petroleum-gas", amount = 50000, fluidbox_index = 1 },
             { type = "item", name = item.name, amount = item.stack_size * 50 }
         }
-        recipe_big.results[1].amount_max = item.stack_size * 100
+        recipe_big.results[1].amount = math.min( item.stack_size * 100, 65535 )
         recipe_big.category = categories[3]
         
         data:extend{ recipe_big }
@@ -136,7 +136,7 @@ local create_fluid_recipe = function( fluid )
         recipe_big.ingredients =
         {
             { type = "item", name = "transport-drone", amount = 1 },
-            { type = "fluid", name = "petroleum-gas", amount = 5000, fluidbox_index = 1 },
+            { type = "fluid", name = "petroleum-gas", amount = 50000, fluidbox_index = 1 },
             { type = "fluid", name = fluid.name, amount = 500000, fluidbox_index = 2 }
         }
         recipe_big.results[1].amount = 30000
