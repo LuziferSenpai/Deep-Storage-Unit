@@ -87,16 +87,11 @@ function dsu:check_request_change()
     if self.item == requested_fluid then return end
 
     if self.item then
-        self:remove_from_network()
         self:suicide_all_drones()
     end
 
     self.item = requested_fluid
     self.amount = 0
-
-    if not self.item then return end
-
-    self:add_to_network()
 end
 
 function dsu:get_requested_fluid()
@@ -106,6 +101,15 @@ function dsu:get_requested_fluid()
 
     return recipe.products[1].name
 end
+
+function dsu:get_current_amount()
+    if not self.item then return 0 end
+
+    local box = self.entity.fluidbox[3]
+
+    return ( box and box.amount or 0 ) + self.amount
+end
+
 
 --DSU Fluid moving
 function dsu:check_input()
@@ -248,14 +252,7 @@ function dsu:update_contents()
     local index = self.index
 
     if item then
-        local fluidbox = self.entity.fluidbox
-        local fluid = fluidbox[3]
-        
-        if fluid then
-            new_contents[item] = self.amount + fluid.amount
-        else
-            new_contents[item] = self.amount
-        end
+        new_contents[item] = self:get_current_amount()
     end
 
     for name, _ in pairs( self.old_contents ) do
@@ -316,7 +313,7 @@ function dsu:check_fuel_amount()
 
     if fuel_request_amount <= self.fuel_on_the_way then return end
 
-    local fuel_depots = dsu.road_network.get_fuel_depots( self.network_id, self.node_position )
+    local fuel_depots = self.road_network.get_depots_by_distance( self.network_id, "fuel", self.node_position )
 
     if not ( fuel_depots and fuel_depots[1] ) then
         self:show_fuel_alert( "No fuel depots on network for request depot" )
@@ -530,28 +527,17 @@ end
 
 --Network
 function dsu:add_to_network()   
-     if not self.item then return end
-    
-     self.network_id = dsu.road_network.add_buffer_depot( self, self.item )
+    self.network_id = self.road_network.add_depot( self, "buffer" )
+    self:update_contents()
 end
 
 function dsu:remove_from_network()
-    if not self.item then return end
-    
-    local network = dsu.road_network.get_network_by_id( self.network_id )
-    
-    if not network then return end
-
-    local buffers  = network.buffers
-
-    buffers[self.item][self.index] = nil
-
+    self.road_network.remove_depot( self, "buffer" )
     self.network_id = nil
 end
 
 --Others
 function dsu:on_removed()
-    self:remove_from_network()
     self:suicide_all_drones()
     self.corpse.destroy()
 end

@@ -1,6 +1,6 @@
 {
   "name": "Deep_Storage_Unit",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "title": "Deep Storage Unit - DSU",
   "author": "LuziferSenpai",
   "contact": "mods@luzifersenpai.de",
@@ -8,7 +8,7 @@
   "dependencies":
   [
     "base",
-    "? Transport_Drones >= 0.4.1"
+    "? Transport_Drones >= 0.5.0"
   ],
   "factorio_version": "0.18"
 }
