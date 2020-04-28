@@ -1,3 +1,4 @@
+local de = defines.events
 local unit_names =
 {
     ["deep-storage-unit-item"] = require( "scripts/units/DSUI" ),
@@ -40,7 +41,7 @@ end
 
 local on_tick = function()
     local index, unit = next( script_data.units, script_data.next_index )
-   
+
     if index then
         script_data.next_index = index
         
@@ -54,17 +55,15 @@ local lib = {}
 
 lib.events = 
 {
-  [defines.events.on_built_entity] = on_created_entity,
-  [defines.events.on_robot_built_entity] = on_created_entity,
-  [defines.events.script_raised_built] = on_created_entity,
-  [defines.events.script_raised_revive] = on_created_entity,
-
-  [defines.events.on_entity_died] = on_entity_removed,
-  [defines.events.on_robot_mined_entity] = on_entity_removed,
-  [defines.events.script_raised_destroy] = on_entity_removed,
-  [defines.events.on_player_mined_entity] = on_entity_removed,
-
-  [defines.events.on_tick] = on_tick
+    [de.on_built_entity] = on_created_entity,
+    [de.on_robot_built_entity] = on_created_entity,
+    [de.script_raised_built] = on_created_entity,
+    [de.script_raised_revive] = on_created_entity,
+    [de.on_entity_died] = on_entity_removed,
+    [de.on_robot_mined_entity] = on_entity_removed,
+    [de.script_raised_destroy] = on_entity_removed,
+    [de.on_player_mined_entity] = on_entity_removed,
+    [de.on_tick] = on_tick
 }
 
 lib.on_init = function()

@@ -7,7 +7,7 @@ if mods["Transport_Drones"] then
 			setting_type = "startup",
 			order = "01",
 			default_value = "__Deep_Storage_Unit__/scripts/units/DSUFB",
-			localised_name = { "", "DO NOT TOUCH!" }
+			hidden = true
 		},
 		{
 			type = "string-setting",
@@ -15,7 +15,7 @@ if mods["Transport_Drones"] then
 			setting_type = "startup",
 			order = "02",
 			default_value = "__Deep_Storage_Unit__/scripts/units/DSUIB",
-			localised_name = { "", "DO NOT TOUCH!" }
+			hidden = true
 		}
 	}
 end

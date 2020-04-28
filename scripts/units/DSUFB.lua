@@ -12,10 +12,10 @@ local dsu = {}
 dsu.metatable = { __index = dsu }
 dsu.corpse_offsets = 
 {
-  [0] = { 0, -3 },
-  [2] = { 3, 0 },
-  [4] = { 0, 3 },
-  [6] = { -3, 0 },
+    [0] = { 0, -3 },
+    [2] = { 3, 0 },
+    [4] = { 0, 3 },
+    [6] = { -3, 0 }
 }
 
 dsu.is_buffer_depot = true
@@ -26,10 +26,11 @@ local Round = function( number )
 	return math.floor( number * multiplier + 0.5 ) / multiplier
 end
 
-local distance = function(a, b)
-  local dx = a[1] - b[1]
-  local dy = a[2] - b[2]
-  return ( ( dx * dx ) + ( dy * dy ) ) ^ 0.5
+local distance = function( a, b )
+    local dx = a[1] - b[1]
+    local dy = a[2] - b[2]
+
+    return ( ( dx * dx ) + ( dy * dy ) ) ^ 0.5
 end
 
 function dsu.new( entity )
@@ -45,7 +46,7 @@ function dsu.new( entity )
 
     local unit =
     {   
-        --together
+        --Together
         entity = entity,
         corpse = corpse,
         item = false,
@@ -386,7 +387,7 @@ end
 
 function dsu:update_drone_sticker()
     local rendering1 = self.rendering[2]
-   
+
     if not self.item then
         if rendering1 and rendering.is_valid( rendering1 ) then
             rendering.destroy( rendering1 )
