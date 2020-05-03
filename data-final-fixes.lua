@@ -31,6 +31,8 @@ local item_types =
     "item-with-tags"
 }
 
+local fuel = data.raw["recipe"]["fuel-depots"].results[1].name
+
 local drones = mods["Transport_Drones"]
 
 local get_subgroup = function( item )
@@ -61,18 +63,17 @@ local create_recipe = function( item )
     {
         type = "recipe",
         name = "store-" .. item.name,
-        localised_name = { "deep-storage-store", item.localised_name or item.place_result and { "entity-name." .. item.place_result } or { "item-name." .. item.name } },
         icon = item.dark_background_item or item.icon,
         icon_size = item.icon_size,
         icons = item.icons,
-        ingredients = { { type = "item", name = item.name, amount = math.min( item.stack_size * 50, 65535 ) } },
-        results = { { type = "item", name = item.name, amount = math.min( item.stack_size * 10, 65535 ), show_details_in_recipe_tooltip = false } },
+        ingredients = { { type = "item", name = item.name, amount = mathmin( item.stack_size * 50, 65535 ) } },
+        results = { { type = "item", name = item.name, amount = mathmin( item.stack_size * 10, 65535 ), show_details_in_recipe_tooltip = false } },
         category = categories[1],
         order = item.order,
         subgroup = get_subgroup( item ),
         overload_multiplier = 200,
         hide_from_player_crafting = true,
-        main_product = "",
+        main_product = item.name,
         allow_decomposition = false,
         allow_as_intermediate = false,
         allow_intermediates = true
@@ -86,10 +87,10 @@ local create_recipe = function( item )
         recipe_big.ingredients =
         {
             { type = "item", name = "transport-drone", amount = 1 },
-            { type = "fluid", name = "petroleum-gas", amount = 50000, fluidbox_index = 1 },
-            { type = "item", name = item.name, amount = math.min( item.stack_size * 50, 65535 ) }
+            { type = "fluid", name = fuel, amount = 50000, fluidbox_index = 1 },
+            { type = "item", name = item.name, amount = mathmin( item.stack_size * 50, 65535 ) }
         }
-        recipe_big.results[1].amount = math.min( item.stack_size * 100, 65535 )
+        recipe_big.results[1].amount = mathmin( item.stack_size * 100, 65535 )
         recipe_big.category = categories[3]
         
         data:extend{ recipe_big }
@@ -122,7 +123,7 @@ local create_fluid_recipe = function( fluid )
         subgroup = fluid.subgroup or "fluid",
         overload_multiplier = 200,
         hide_from_player_crafting = true,
-        main_product = "",
+        main_product = fluid.name,
         allow_decomposition = false,
         allow_as_intermediate = false,
         allow_intermediates = true
@@ -130,13 +131,13 @@ local create_fluid_recipe = function( fluid )
     
     data:extend{ recipe }
 
-    if drones and fluid.name ~= "petroleum-gas" then
+    if drones and fluid.name ~= fuel then
         local recipe_big = deep_copy( recipe )
         recipe_big.name = "store-big-" .. fluid.name
         recipe_big.ingredients =
         {
             { type = "item", name = "transport-drone", amount = 1 },
-            { type = "fluid", name = "petroleum-gas", amount = 50000, fluidbox_index = 1 },
+            { type = "fluid", name = fuel, amount = 50000, fluidbox_index = 1 },
             { type = "fluid", name = fluid.name, amount = 500000, fluidbox_index = 2 }
         }
         recipe_big.results[1].amount = 30000

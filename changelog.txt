@@ -1,8 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.0.11
+Date: 03.05.2020
+  Bugfixes:
+    - Fixed bug with self:get_current_amount()
+    - Fixed localised name
+  Changes:
+    - Updated script to work with newest Transport Drone Version
+---------------------------------------------------------------------------------------------------
 Version: 0.0.10
 Date: 24.04.2020
   Changes:
-    - Added LuaSettings::hiddden
+    - Added LuaSettings::hidden
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.9
 Date: 20.04.2020

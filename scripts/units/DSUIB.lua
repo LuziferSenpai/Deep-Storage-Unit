@@ -1,4 +1,4 @@
-local fuel_amount_per_drone = 50
+local fuel_amount_per_drone = settings.startup["fuel-amount-per-drone"].value
 local item_heuristic_bonus = 50
 local max = math.max
 local min = math.min
@@ -6,36 +6,54 @@ local big = math.huge
 local icon_param = { type = "virtual", name = "fuel-signal" }
 local assembling_input = defines.inventory.assembling_machine_input
 local stack_cache = {}
+local valid_item_cache = {}
+local fuel_fluid
 
 local dsu = {}
 
 dsu.metatable = { __index = dsu }
 dsu.corpse_offsets = 
 {
-  [0] = { 0, -3 },
-  [2] = { 3, 0 },
-  [4] = { 0, 3 },
-  [6] = { -3, 0 },
+    [0] = { 0, -3 },
+    [2] = { 3, 0 },
+    [4] = { 0, 3 },
+    [6] = { -3, 0 },
 }
 
 dsu.is_buffer_depot = true
 
-local get_stack_size = function(item)
+local get_stack_size = function( item )
     local size = stack_cache[item]
     
     if not size then
-    
         size = game.item_prototypes[item].stack_size
         stack_cache[item] = size
     end
-  
+
     return size
 end
 
+local is_valid_item = function( item_name )
+    if valid_item_cache[item_name] then return true end
+
+    valid_item_cache[item_name] = game.item_prototypes[item_name] ~= nil
+
+    return valid_item_cache[item_name]
+end
+
+local get_fuel_fluid = function()
+    if fuel_fluid then return fuel_fluid end
+    
+    fuel_fluid = game.recipe_prototypes["fuel-depots"].products[1].name
+    
+    return fuel_fluid
+end
+
 local distance = function(a, b)
-  local dx = a[1] - b[1]
-  local dy = a[2] - b[2]
-  return ( ( dx * dx ) + ( dy * dy ) ) ^ 0.5
+    local dx = a[1] - b[1]
+    local dy = a[2] - b[2]
+    
+    return ( ( dx * dx ) + ( dy * dy ) ) ^ 0.5
 end
 
 function dsu.new( entity )
@@ -119,7 +137,7 @@ end
 --DSU Item moving
 function dsu:check_input()
     local item = self.item
-   
+
     if item then
         local inventory = self.entity.get_inventory( assembling_input )
         local item_count = inventory.get_item_count( item )
@@ -147,7 +165,7 @@ end
 
 function dsu:update_sticker()
     local rendering1 = self.rendering[1]
-   
+
     if not self.item then
         if rendering1 and rendering.is_valid( rendering1 ) then
             rendering.destroy( rendering1 )
@@ -190,7 +208,7 @@ function dsu:get_to_be_taken( name )
 end
 
 function dsu:get_available_item_count( name )
-  return self.entity.get_output_inventory().get_item_count( name ) - self:get_to_be_taken( name )
+    return ( self.amount + self.entity.get_output_inventory().get_item_count( name ) ) - self:get_to_be_taken( name )
 end
 
 function dsu:get_available_stack_amount()
@@ -291,7 +309,7 @@ function dsu:check_fuel_amount()
     local fuel_depots = self.road_network.get_depots_by_distance( self.network_id, "fuel", self.node_position )
 
     if not ( fuel_depots and fuel_depots[1] ) then
-        self:show_fuel_alert( "No fuel depots on network for request depot" )
+        self:show_fuel_alert( { "no-fuel-depot-on-network" } )
 
         return
     end
@@ -304,7 +322,7 @@ function dsu:check_fuel_amount()
         end
     end
 
-    self:show_fuel_alert( "No fuel in network for request depot" )
+    self:show_fuel_alert( { "no-fuel-in-network" } )
 end
 
 function dsu:get_fuel_amount()
@@ -361,7 +379,7 @@ end
 
 function dsu:update_drone_sticker()    
     local rendering1 = self.rendering[2]
-   
+
     if not self.item then
         if rendering1 and rendering.is_valid( rendering1 ) then
             rendering.destroy( rendering1 )
@@ -425,11 +443,12 @@ function dsu:get_minimum_request_size()
 end
 
 function dsu:take_item( name, count )
-    if game.item_prototypes[name] then
-        self.amount = self.amount + count
-    end
+    if not count then error( "COUNT?" ) end
 
-    self:update_sticker()
+    if game.item_prototypes[name] and is_valid_item( name ) then
+        self.amount = self.amount + count
+        self:update_sticker()
+    end
 end
 
 function dsu:should_order( plus_one )
@@ -454,7 +473,7 @@ function dsu:make_request()
     if not supply_depots then return end
 
     local request_size = self:get_request_size()
-
+    local minimum_size = self:get_minimum_request_size()
     local node_position = self.node_position
     
     local heuristic = function( depot, count )
@@ -462,7 +481,7 @@ function dsu:make_request()
 
         local amount = min( count, request_size )
 
-        if amount < self:get_minimum_request_size() then
+        if amount < minimum_size then
             return big
         end
 
@@ -481,9 +500,9 @@ function dsu:make_request()
 
             if score < lowest_score then
                 best_buffer = depot
+                lowest_score = score
                 best_index = index
                 best_count = count
-                lowest_score = score
             end
         end
     end

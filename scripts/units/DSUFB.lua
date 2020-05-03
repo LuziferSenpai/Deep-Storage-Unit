@@ -1,11 +1,13 @@
-local fuel_amount_per_drone = 50
-local drone_fluid_capacity = 500
+local fuel_amount_per_drone = settings.startup["fuel-amount-per-drone"].value
+local drone_fluid_capacity = settings.startup["drone-fluid-capacity"].value
 local item_heuristic_bonus = 50
 local max = math.max
 local min = math.min
 local big = math.huge
 local icon_param = { type = "virtual", name = "fuel-signal" }
 local assembling_input = defines.inventory.assembling_machine_input
+local valid_fluid_cache = {}
+local fuel_fluid
 
 local dsu = {}
 
@@ -24,6 +26,22 @@ local Round = function( number )
 	local multiplier = 10 ^ 0
 
 	return math.floor( number * multiplier + 0.5 ) / multiplier
+end
+
+local is_valid_fluid = function( fluid_name )
+    if valid_fluid_cache[fluid_name] then return true end
+
+    valid_fluid_cache[fluid_name] = game.fluid_prototypes[fluid_name] ~= nil
+    
+    return valid_fluid_cache[fluid_name]
+end
+
+local get_fuel_fluid = function()
+    if fuel_fluid then return fuel_fluid end
+    
+    fuel_fluid = game.recipe_prototypes["fuel-depots"].products[1].name
+    
+    return fuel_fluid
 end
 
 local distance = function( a, b )
@@ -200,7 +218,7 @@ end
 function dsu:get_available_item_count( name )
     local box = self.entity.fluidbox[3]
     
-    return ( ( box and box.name and box.name == name and box.amount ) or 0 ) - self:get_to_be_taken( name )
+    return ( self.amount + ( ( box and box.name and box.name == name and box.amount ) or 0 ) ) - self:get_to_be_taken( name )
 end
 
 function dsu:get_available_stack_amount()
@@ -317,7 +335,7 @@ function dsu:check_fuel_amount()
     local fuel_depots = self.road_network.get_depots_by_distance( self.network_id, "fuel", self.node_position )
 
     if not ( fuel_depots and fuel_depots[1] ) then
-        self:show_fuel_alert( "No fuel depots on network for request depot" )
+        self:show_fuel_alert( { "no-fuel-depot-on-network" } )
 
         return
     end
@@ -330,7 +348,7 @@ function dsu:check_fuel_amount()
         end
     end
 
-    self:show_fuel_alert( "No fuel in network for request depot" )
+    self:show_fuel_alert( { "no-fuel-in-network" } )
 end
 
 function dsu:get_fuel_amount()
@@ -451,11 +469,12 @@ function dsu:get_minimum_request_size()
 end
 
 function dsu:take_item( name, count )
-    if game.fluid_prototypes[name] then
-        self.amount = self.amount + count
-    end
+    if not count then error( "COUNT?" ) end
 
-    self:update_sticker()
+    if game.fluid_prototypes[name] and is_valid_fluid( name ) then
+        self.amount = self.amount + count
+        self:update_sticker()
+    end
 end
 
 function dsu:should_order( plus_one )
@@ -480,7 +499,7 @@ function dsu:make_request()
     if not supply_depots then return end
 
     local request_size = self:get_request_size()
-
+    local minimum_size = self:get_minimum_request_size()
     local node_position = self.node_position
     
     local heuristic = function( depot, count )
@@ -488,7 +507,7 @@ function dsu:make_request()
 
         local amount = min( count, request_size )
 
-        if amount < self:get_minimum_request_size() then
+        if amount < minimum_size then
             return big
         end
 
@@ -527,7 +546,7 @@ function dsu:make_request()
 end
 
 --Network
-function dsu:add_to_network()   
+function dsu:add_to_network()
     self.network_id = self.road_network.add_depot( self, "buffer" )
     self:update_contents()
 end
