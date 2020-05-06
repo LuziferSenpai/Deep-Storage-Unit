@@ -131,7 +131,7 @@ local create_fluid_recipe = function( fluid )
     
     data:extend{ recipe }
 
-    if drones and fluid.name ~= fuel then
+    if drones and fluid.name ~= fuel and fluid.name ~= "gas-methane" then
         local recipe_big = deep_copy( recipe )
         recipe_big.name = "store-big-" .. fluid.name
         recipe_big.ingredients =
