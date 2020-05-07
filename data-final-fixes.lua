@@ -31,9 +31,13 @@ local item_types =
     "item-with-tags"
 }
 
-local fuel = data.raw["recipe"]["fuel-depots"].results[1].name
+local fuel
 
 local drones = mods["Transport_Drones"]
+
+if drones then
+    fuel = data.raw["recipe"]["fuel-depots"].results[1].name
+end
 
 local get_subgroup = function( item )
     if item.subgroup then return item.subgroup end
