@@ -10,7 +10,7 @@ end
 function dsu.new( entity )
     entity.active = false
 
-    local connector = entity.surface.create_entity{ name = "deep-connector", position = { entity.position.x - 1, entity.position.y + 1 }, direction = defines.direction.south, force = entity.force }
+    local connector = entity.surface.create_entity{ name = "deep-connector", position = { entity.position.x - 2, entity.position.y + 3 }, direction = defines.direction.south, force = entity.force }
 
     connector.minable = false
     connector.operable = false 
@@ -88,11 +88,11 @@ function dsu:check_output()
         local fluidbox = self.entity.fluidbox
         local box = fluidbox[2] or { name = fluid, amount = 0 }
         local amount2 = box.amount
-        local amount3 = 10000 - amount2
+        local amount3 = 90000 - amount2
 
         if amount3 > 0 then
             if amount1 >= amount3 then
-                box.amount = 10000
+                box.amount = 90000
                 fluidbox[2] = box
                 self.amount = amount1 - amount3
             else
@@ -133,8 +133,7 @@ function dsu:update_sticker()
         forces = { entity.force },
         color = { r = 1, g = 1, b = 1 },
         alignment = "center",
-        scale = 1.5,
-        target_offset = { 0, -0.5 }
+        scale = 2,
     }
 end
 
@@ -146,19 +145,6 @@ end
 
 function dsu:on_removed()
     self.connector.destroy()
-end
-
-function dsu:on_configuration_changed()
-    if not self.connector then
-        local entity = self.entity
-
-        local connector = entity.surface.create_entity{ name = "deep-connector", position = { entity.position.x - 1, entity.position.y + 1 }, direction = defines.direction.south, force = entity.force }
-
-        connector.minable = false
-        connector.operable = false
-
-        self.connector = connector
-    end
 end
 
 local lib = {}

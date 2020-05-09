@@ -62,11 +62,17 @@ function dsu.new( entity )
     local corpse = surface.create_entity{ name = "transport-caution-corpse", position = corpse_position }
     corpse.corpse_expires = false
 
+    local connector = entity.surface.create_entity{ name = "deep-connector", position = { entity.position.x - 1, entity.position.y + 2 }, direction = defines.direction.south, force = entity.force }
+
+    connector.minable = false
+    connector.operable = false
+
     local unit =
     {   
         --Together
         entity = entity,
         corpse = corpse,
+        connector = connector,
         item = false,
         amount = 0,
         rendering = {},
@@ -98,6 +104,7 @@ function dsu:update()
     self:make_request()
     self:update_sticker()
     self:update_drone_sticker()
+    self:update_connector()
 end
 
 function dsu:check_request_change()
@@ -204,6 +211,12 @@ function dsu:update_sticker()
         scale = 1.5,
         target_offset = { 0, -0.75 }
     }
+end
+
+function dsu:update_connector()
+    if self.item then
+        self.connector.get_or_create_control_behavior().set_signal( 1, { signal = { type = "fluid", name = self.item }, count = Round( self:get_current_amount() ) } )
+    end
 end
 
 --Supplier
@@ -448,7 +461,7 @@ function dsu:remove_drone( drone, remove_item )
 end
 
 function dsu:dispatch_drone( depot, count )
-    local drone = self.transport_drone.new( self )
+    local drone = self.transport_drone.new( self, self.item )
 
     drone:pickup_from_supply( depot, count )
 
@@ -560,10 +573,22 @@ end
 function dsu:on_removed()
     self:suicide_all_drones()
     self.corpse.destroy()
+    self.connector.destroy()
 end
 
 function dsu:on_config_changed()
     self.old_contents = self.old_contents or {}
+
+    if not self.connector then
+        local entity = self.entity
+
+        local connector = entity.surface.create_entity{ name = "deep-connector", position = { entity.position.x - 1, entity.position.y + 2 }, direction = defines.direction.south, force = entity.force }
+
+        connector.minable = false
+        connector.operable = false
+
+        self.connector = connector
+    end
 end
 
 return dsu

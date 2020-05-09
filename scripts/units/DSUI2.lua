@@ -5,7 +5,7 @@ local assembling_input = defines.inventory.assembling_machine_input
 function dsu.new( entity )
     entity.active = false
 
-    local connector = entity.surface.create_entity{ name = "deep-connector", position = { entity.position.x - 1, entity.position.y + 1 }, direction = defines.direction.south, force = entity.force }
+    local connector = entity.surface.create_entity{ name = "deep-connector", position = { entity.position.x - 1, entity.position.y + 2 }, direction = defines.direction.south, force = entity.force }
 
     connector.minable = false
     connector.operable = false 
@@ -113,8 +113,7 @@ function dsu:update_sticker()
         forces = { entity.force },
         color = { r = 1, g = 1, b = 1 },
         alignment = "center",
-        scale = 1.5,
-        target_offset = { 0, -0.5 }
+        scale = 1.5
     }
 end
 
@@ -126,19 +125,6 @@ end
 
 function dsu:on_removed()
     self.connector.destroy()
-end
-
-function dsu:on_configuration_changed()
-    if not self.connector then
-        local entity = self.entity
-
-        local connector = entity.surface.create_entity{ name = "deep-connector", position = { entity.position.x - 1, entity.position.y + 1 }, direction = defines.direction.south, force = entity.force }
-
-        connector.minable = false
-        connector.operable = false
-
-        self.connector = connector
-    end
 end
 
 local lib = {}

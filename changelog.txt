@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.0
+Date: 09.05.2020
+  Changes:
+    - Adjusted to newest Version of Transport Drones
+  Features:
+    - Added a Combinator that outputs the complete content
+    - Added 4 new DSU's
+---------------------------------------------------------------------------------------------------
 Version: 0.0.13
 Date: 07.05.2020
   Bugfixes:

@@ -5,7 +5,9 @@ local categories =
     "deep-storage-item",
     "deep-storage-fluid",
     "deep-storage-item-big",
-    "deep-storage-fluid-big"
+    "deep-storage-fluid-big",
+    "deep-storage-item-mk2/3",
+    "deep-storage-fluid-mk2/3"
 }
 local item_types =
 {
@@ -75,7 +77,6 @@ local create_recipe = function( item )
         category = categories[1],
         order = item.order,
         subgroup = get_subgroup( item ),
-        overload_multiplier = 200,
         hide_from_player_crafting = true,
         main_product = item.name,
         allow_decomposition = false,
@@ -83,7 +84,13 @@ local create_recipe = function( item )
         allow_intermediates = true
     }
 
-    data:extend{ recipe }
+    local recipe_mk23 = deep_copy( recipe )
+    recipe_mk23.name = "store-mk2/3-" .. item.name
+    recipe_mk23.ingredients[1].amount = mathmin( item.stack_size * 100, 65535 )
+    recipe_mk23.results[1].amount = mathmin( item.stack_size * 150, 65535 )
+    recipe_mk23.category = categories[5]
+
+    data:extend{ recipe, recipe_mk23 }
 
     if drones and item.name ~= "transport-drone" then
         local recipe_big = deep_copy( recipe )
@@ -96,6 +103,7 @@ local create_recipe = function( item )
         }
         recipe_big.results[1].amount = mathmin( item.stack_size * 100, 65535 )
         recipe_big.category = categories[3]
+        recipe_big.overload_multiplier = 10000
         
         data:extend{ recipe_big }
     end
@@ -112,42 +120,48 @@ for _, item_type in pairs( item_types ) do
 end
 
 local create_fluid_recipe = function( fluid )
-    local recipe =
-    {
-        type = "recipe",
-        name = "store-" .. fluid.name,
-        localised_name = { "deep-storage-store", fluid.localised_name or { "fluid-name." .. fluid.name } },
-        icon = fluid.icon,
-        icon_size = fluid.icon_size,
-        icons = fluid.icons,
-        ingredients = { { type = "fluid", name = fluid.name, amount = 500000 } },
-        results = { { type = "fluid", name = fluid.name, amount = 10000, show_details_in_recipe_tooltip = false } },
-        category = categories[2],
-        order = fluid.order,
-        subgroup = fluid.subgroup or "fluid",
-        overload_multiplier = 200,
-        hide_from_player_crafting = true,
-        main_product = fluid.name,
-        allow_decomposition = false,
-        allow_as_intermediate = false,
-        allow_intermediates = true
-    }
-    
-    data:extend{ recipe }
-
-    if drones and fluid.name ~= fuel and fluid.name ~= "gas-methane" then
-        local recipe_big = deep_copy( recipe )
-        recipe_big.name = "store-big-" .. fluid.name
-        recipe_big.ingredients =
+    if not ( fluid.subgroup and fluid.subgroup == "trainparts-fluid" ) then
+        local recipe =
         {
-            { type = "item", name = "transport-drone", amount = 1 },
-            { type = "fluid", name = fuel, amount = 50000, fluidbox_index = 1 },
-            { type = "fluid", name = fluid.name, amount = 500000, fluidbox_index = 2 }
+            type = "recipe",
+            name = "store-" .. fluid.name,
+            icon = fluid.icon,
+            icon_size = fluid.icon_size,
+            icons = fluid.icons,
+            ingredients = { { type = "fluid", name = fluid.name, amount = 500000 } },
+            results = { { type = "fluid", name = fluid.name, amount = 10000, show_details_in_recipe_tooltip = false } },
+            category = categories[2],
+            order = fluid.order,
+            subgroup = fluid.subgroup or "fluid",
+            hide_from_player_crafting = true,
+            main_product = fluid.name,
+            allow_decomposition = false,
+            allow_as_intermediate = false,
+            allow_intermediates = true
         }
-        recipe_big.results[1].amount = 30000
-        recipe_big.category = categories[4]
 
-        data:extend{ recipe_big }
+        local recipe_mk23 = deep_copy( recipe )
+        recipe_mk23.name = "store-mk2/3-" .. fluid.name
+        recipe_mk23.results[1].amount = 90000
+        recipe_mk23.category = categories[6]
+    
+        data:extend{ recipe, recipe_mk23 }
+
+        if drones and fluid.name ~= fuel and fluid.name ~= "gas-methane" then
+            local recipe_big = deep_copy( recipe )
+            recipe_big.name = "store-big-" .. fluid.name
+            recipe_big.ingredients =
+            {
+                { type = "item", name = "transport-drone", amount = 1 },
+                { type = "fluid", name = fuel, amount = 50000, fluidbox_index = 1 },
+                { type = "fluid", name = fluid.name, amount = 500000, fluidbox_index = 2 }
+            }
+            recipe_big.results[1].amount = 30000
+            recipe_big.category = categories[4]
+            recipe_big.overload_multiplier = 10000
+
+            data:extend{ recipe_big }
+        end
     end
 end
 

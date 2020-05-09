@@ -1,8 +1,12 @@
 local de = defines.events
 local unit_names =
 {
-    ["deep-storage-unit-item"] = require( "scripts/units/DSUI" ),
-    ["deep-storage-unit-fluid"] = require( "scripts/units/DSUF" ),
+    ["deep-storage-unit-item"] = require "scripts/units/DSUI",
+    ["deep-storage-unit-fluid"] = require "scripts/units/DSUF",
+    ["deep-storage-unit-item-mk2"] = require "scripts/units/DSUI2",
+    ["deep-storage-unit-item-mk3"] = require "scripts/units/DSUI3",
+    ["deep-storage-unit-fluid-mk2"] = require "scripts/units/DSUF2",
+    ["deep-storage-unit-fluid-mk3"] = require "scripts/units/DSUF3"
 }
 
 local script_data =
@@ -85,6 +89,16 @@ lib.on_configuration_changed = function()
 
     for _, force in pairs( game.forces ) do
         force.reset_technology_effects()
+    end
+
+    for index, unit in pairs( script_data.units ) do
+        if not unit.entity.valid then
+            script_data.units[index] = nil
+        else
+            if unit.on_configuration_changed then
+                unit:on_configuration_changed()
+            end
+        end
     end
 end
 
