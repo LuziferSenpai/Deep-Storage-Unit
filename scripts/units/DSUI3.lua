@@ -5,7 +5,7 @@ local assembling_input = defines.inventory.assembling_machine_input
 function dsu.new( entity )
     entity.active = false
 
-    local connector = entity.surface.create_entity{ name = "deep-connector", position = { entity.position.x - 3, entity.position.y + 2 }, direction = defines.direction.south, force = entity.force }
+    local connector = entity.surface.create_entity{ name = "deep-connector", position = { entity.position.x - 2, entity.position.y + 3 }, direction = defines.direction.south, force = entity.force }
 
     connector.minable = false
     connector.operable = false 
