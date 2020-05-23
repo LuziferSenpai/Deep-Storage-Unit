@@ -228,10 +228,8 @@ function dsu:get_to_be_taken( name )
     return self.to_be_taken[name] or 0
 end
 
-function dsu:get_available_item_count( name )
-    local box = self.entity.fluidbox[3]
-    
-    return ( self.amount + ( ( box and box.name and box.name == name and box.amount ) or 0 ) ) - self:get_to_be_taken( name )
+function dsu:get_available_item_count( name )    
+    return self:get_current_amount() - self:get_to_be_taken( name )
 end
 
 function dsu:get_available_stack_amount()
@@ -252,8 +250,6 @@ function dsu:give_item( requested_name, requested_count )
 
     if selfamount >= requested_count then
         self.amount = selfamount - requested_count
-
-        self:update_sticker()
 
         return requested_count
     else
@@ -486,16 +482,7 @@ function dsu:take_item( name, count )
 
     if game.fluid_prototypes[name] and is_valid_fluid( name ) then
         self.amount = self.amount + count
-        self:update_sticker()
     end
-end
-
-function dsu:should_order( plus_one )
-    if self:get_fuel_amount() < fuel_amount_per_drone then return end
-
-    local drone_spawn_count = self:get_drone_item_count() - math.floor( 0 / self:get_request_size() )
-
-    return drone_spawn_count + ( plus_one and 1 or 0 ) > self:get_active_drone_count()
 end
 
 function dsu:make_request()
@@ -504,57 +491,22 @@ function dsu:make_request()
     if not item then return end
 
     if not self:can_spawn_drone() then return end
-    
-    if not self:should_order() then return end
 
     local supply_depots = self.road_network.get_supply_depots( self.network_id, item )
 
     if not supply_depots then return end
 
     local request_size = self:get_request_size()
-    local minimum_size = self:get_minimum_request_size()
-    local node_position = self.node_position
-    
-    local heuristic = function( depot, count )
-        if depot.is_buffer_depot then return big end
-
-        local amount = min( count, request_size )
-
-        if amount < minimum_size then
-            return big
-        end
-
-        return distance( depot.node_position, node_position ) - ( ( amount / request_size ) * item_heuristic_bonus )
-    end
-
-    local best_buffer, best_index, best_count
-    local lowest_score = big
     local get_depot = self.get_depot
 
     for index, count in pairs( supply_depots ) do
         local depot = get_depot( index )
 
-        if depot then
-            local score = heuristic( depot, count )
-
-            if score < lowest_score then
-                best_buffer = depot
-                lowest_score = score
-                best_index = index
-                best_count = count
+        if depot and not depot.is_buffer_depot then
+            if request_size <= count then
+                self:dispatch_drone( depot, request_size )
             end
         end
-    end
-
-    if not best_buffer then return end
-
-    if request_size >= best_count then
-        supply_depots[best_index] = nil
-        self:dispatch_drone( best_buffer, best_count )
-    else
-        supply_depots[best_index] = best_count - request_size
-        
-        self:dispatch_drone( best_buffer, request_size )
     end
 end
 

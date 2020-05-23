@@ -493,7 +493,7 @@ connector_entity.name = "deep-connector"
 connector_entity.icon = "__core__/graphics/empty.png"
 connector_entity.icon_size = 1
 connector_entity.icon_mipmaps = nil
-connector_entity.flags = { "placeable-neutral", "not-rotatable", "not-repairable", "not-blueprintable", "not-deconstructable","hide-alt-info", "not-flammable", "no-copy-paste", "not-upgradable" }
+connector_entity.flags = { "placeable-neutral", "not-rotatable", "not-repairable", "not-blueprintable", "not-deconstructable", "hide-alt-info", "not-flammable", "no-copy-paste", "not-upgradable" }
 connector_entity.item_slot_count = 1
 connector_entity.order = "vgvrewoi"
 
