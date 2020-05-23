@@ -496,6 +496,7 @@ connector_entity.icon_mipmaps = nil
 connector_entity.flags = { "placeable-neutral", "not-rotatable", "not-repairable", "not-blueprintable", "not-deconstructable", "hide-alt-info", "not-flammable", "no-copy-paste", "not-upgradable" }
 connector_entity.item_slot_count = 1
 connector_entity.order = "vgvrewoi"
+connector_entity.selection_priority = 255
 
 
 
