@@ -211,6 +211,10 @@ function dsu:update_connector()
     end
 end
 
+function dsu:say( string )
+    self.entity.surface.create_entity{ name = "tutorial-flying-text", position = self.entity.position, text = string }
+end
+
 --Supplier
 function dsu:add_to_be_taken( name, count )
     self.to_be_taken[name] = ( self.to_be_taken[name] or 0 ) + count
