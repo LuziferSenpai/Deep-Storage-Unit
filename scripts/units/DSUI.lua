@@ -8,7 +8,7 @@ function dsu.new( entity )
     local connector = entity.surface.create_entity{ name = "deep-connector", position = { entity.position.x - 1, entity.position.y + 1 }, direction = defines.direction.south, force = entity.force }
 
     connector.minable = false
-    connector.operable = false 
+    connector.operable = false
 
     local unit =
     {
@@ -34,7 +34,7 @@ end
 
 function dsu:check_request_change()
     local requested_item = self:get_requested_item()
-    
+
     if self.item == requested_item then return end
 
     self.item = requested_item
