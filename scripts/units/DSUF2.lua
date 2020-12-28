@@ -1,30 +1,31 @@
 local dsu = {}
-local unit_metatable = { __index = dsu }
+local unit_metatable = {__index = dsu}
+local mathmin = math.min
+local mathmax = math.max
 
-local Round = function( number )
-	local multiplier = 10 ^ 0
+local function Round(number)
+    local multiplier = 10 ^ 0
 
-	return math.floor( number * multiplier + 0.5 ) / multiplier
+    return math.floor(number * multiplier + 0.5) / multiplier
 end
 
-function dsu.new( entity )
+function dsu.new(entity)
     entity.active = false
 
-    local connector = entity.surface.create_entity{ name = "deep-connector", position = { entity.position.x - 1, entity.position.y + 2 }, direction = defines.direction.south, force = entity.force }
+    local connector = entity.surface.create_entity{name = "deep-connector", position = {entity.position.x - 1, entity.position.y + 2}, direction = defines.direction.south, force = entity.force}
 
     connector.minable = false
     connector.operable = false 
 
-    local unit =
-    {
+    local unit = {
         entity = entity,
         connector = connector,
-        index = tostring( entity.unit_number ),
+        index = tostring(entity.unit_number),
         fluid = false,
         amount = 0
     }
 
-    setmetatable( unit, unit_metatable )
+    setmetatable(unit, unit_metatable)
 
     return unit
 end
@@ -39,7 +40,7 @@ end
 
 function dsu:check_request_change()
     local requested_fluid = self:get_requested_fluid()
-    
+
     if self.fluid == requested_fluid then return end
 
     self.fluid = requested_fluid
@@ -61,14 +62,14 @@ function dsu:get_current_amount()
 
     local box = self.entity.fluidbox[2]
 
-    return ( box and box.amount or 0 ) + self.amount
+    return (box and box.amount or 0) + self.amount
 end
 
 function dsu:check_input()
     if self.fluid then
         local box = self.entity.fluidbox
         local fluid = box[1]
-        
+
         if fluid then
             local amount = fluid.amount
 
@@ -83,10 +84,10 @@ end
 function dsu:check_output()
     local fluid = self.fluid
     local amount1 = self.amount
-    
+
     if fluid and amount1 > 0 then
         local fluidbox = self.entity.fluidbox
-        local box = fluidbox[2] or { name = fluid, amount = 0 }
+        local box = fluidbox[2] or {name = fluid, amount = 0}
         local amount2 = box.amount
         local amount3 = 90000 - amount2
 
@@ -106,19 +107,19 @@ end
 
 function dsu:update_sticker()
     local rendering1 = self.rendering
-    
+
     if not self.fluid then
-        if rendering1 and rendering.is_valid( rendering1 ) then
-            rendering.destroy( rendering1 )
-            
+        if rendering1 and rendering.is_valid(rendering1) then
+            rendering.destroy(rendering1)
+
             self.rendering = nil
         end
 
         return
     end
 
-    if rendering1 and rendering.is_valid( rendering1 ) then
-        rendering.set_text( rendering1, Round( self.amount ) )
+    if rendering1 and rendering.is_valid(rendering1) then
+        rendering.set_text(rendering1, Round(self.amount))
         return
     end
 
@@ -139,7 +140,7 @@ end
 
 function dsu:update_connector()
     if self.fluid then
-        self.connector.get_or_create_control_behavior().set_signal( 1, { signal = { type = "fluid", name = self.fluid }, count = Round( self:get_current_amount() ) } )
+        self.connector.get_or_create_control_behavior().set_signal(1, {signal = {type = "fluid", name = self.fluid}, count = mathmin(2147483647, mathmax(-2147483647, Round(self:get_current_amount())))})
     end
 end
 
@@ -149,8 +150,8 @@ end
 
 local lib = {}
 
-lib.load = function( unit )
-    setmetatable( unit, unit_metatable )
+lib.load = function(unit)
+    setmetatable(unit, unit_metatable)
 end
 
 lib.new = dsu.new
