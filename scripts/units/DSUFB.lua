@@ -160,14 +160,14 @@ function dsu:check_output()
 end
 
 function dsu:update_sticker()
-    local rendering1 = self.rendering
+    local rendering1 = self.rendering[1]
     local entity = self.entity
 
     if not self.item then
         if rendering1 and rendering.is_valid(rendering1) then
             rendering.destroy(rendering1)
 
-            self.rendering = nil
+            self.rendering[1] = nil
         end
 
         return
@@ -178,7 +178,7 @@ function dsu:update_sticker()
         return
     end
 
-    self.rendering = rendering.draw_text{
+    self.rendering[1] = rendering.draw_text{
         surface = entity.surface.index,
         target = entity,
         text = Round(self.amount),
@@ -508,6 +508,7 @@ end
 
 function dsu:on_config_changed()
     self.old_contents = self.old_contents or {}
+    self.rendering = {}
 
     if not self.connector then
         local entity = self.entity
