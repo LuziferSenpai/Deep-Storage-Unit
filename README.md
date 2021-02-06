@@ -2,7 +2,8 @@
 
 Hey Guys,
 
-this Modification adds 4(+2 for Transport Drones) DSU's. 2 Item and 2 Fluid Version.
+this Modification adds 6(+2 for Transport Drones) DSU's. 3 Item and 3 Fluids.
+This mod is 100% compatibel with [Transport Drones](https://mods.factorio.com/mod/Transport_Drones).
 They can hold unlimited Items and Fluids!
 
 I have a [Discord](https://discord.gg/rVpjuh4) for discussion, etc.

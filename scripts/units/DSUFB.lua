@@ -1,9 +1,10 @@
-local fuel_amount_per_drone = settings.startup["fuel-amount-per-drone"].value
-local drone_fluid_capacity = settings.startup["drone-fluid-capacity"].value
+local fuel_amount_per_drone = shared.fuel_amount_per_drone
+local drone_fluid_capacity = shared.drone_fluid_capacity
 local icon_param = {type = "virtual", name = "fuel-signal"}
 local assembling_input = defines.inventory.assembling_machine_input
 local mathmax = math.max
 local mathmin = math.min
+local fuel_fluid
 local valid_fluid_cache = {}
 local dsu = {}
 
@@ -29,6 +30,16 @@ local is_valid_fluid = function(fluid_name)
     valid_fluid_cache[fluid_name] = game.fluid_prototypes[fluid_name] ~= nil
 
     return valid_fluid_cache[fluid_name]
+end
+
+local get_fuel_fluid = function()
+    if fuel_fluid then
+        return fuel_fluid
+    end
+
+    fuel_fluid = game.recipe_prototypes["fuel-depots"].products[1].name
+
+    return fuel_fluid
 end
 
 function dsu.new(entity)
@@ -110,23 +121,23 @@ end
 function dsu:get_current_amount()
     if not self.item then return 0 end
 
-    local box = self.entity.fluidbox[2]
+    local box = self.entity.fluidbox[3]
 
     return (box and box.amount or 0) + self.amount
 end
 
 
---DSU Fluid moving
+--*DSU Fluid moving
 function dsu:check_input()
     if self.item then
         local box = self.entity.fluidbox
-        local fluid = box[1]
+        local fluid = box[2]
 
         if fluid then
             local amount = fluid.amount
 
             if amount > 0 then
-                box[1] = nil
+                box[2] = nil
                 self.amount = self.amount + amount
             end
         end
@@ -139,19 +150,19 @@ function dsu:check_output()
 
     if fluid and amount1 > 0 then
         local fluidbox = self.entity.fluidbox
-        local box = fluidbox[2] or {name = fluid, amount = 0}
+        local box = fluidbox[3] or {name = fluid, amount = 0}
         local amount2 = box.amount
         local amount3 = 10000 - amount2
 
         if amount3 > 0 then
             if amount1 >= amount3 then
                 box.amount = 10000
-                fluidbox[2] = box
+                fluidbox[3] = box
 
                 self.amount = amount1 - amount3
             else
                 box.amount = amount2 + amount1
-                fluidbox[2] = box
+                fluidbox[3] = box
 
                 self.amount = 0
             end
@@ -197,7 +208,7 @@ function dsu:update_connector()
     end
 end
 
---Supplier
+--*Supplier
 function dsu:add_to_be_taken(name, count)
     self.to_be_taken[name] = (self.to_be_taken[name] or 0) + count
 end
@@ -206,7 +217,7 @@ function dsu:get_to_be_taken(name)
     return self.to_be_taken[name] or 0
 end
 
-function dsu:get_available_item_count( name )
+function dsu:get_available_item_count(name)
     return self:get_current_amount() - self:get_to_be_taken(name)
 end
 
@@ -291,7 +302,7 @@ function dsu:update_contents()
     self.old_contents = new_contents
 end
 
---Requester
+--*Requester
 --Fuel
 function dsu:minimum_fuel_amount()
     return mathmax(fuel_amount_per_drone * 2, fuel_amount_per_drone * self:get_drone_item_count() * 0.2)
@@ -305,6 +316,10 @@ function dsu:show_fuel_alert(message)
     for _, player in pairs(game.connected_players) do
         player.add_custom_alert(self.entity, icon_param, message , true)
     end
+end
+
+function dsu:get_fuel_amount()
+    return self.entity.get_fluid_count(get_fuel_fluid())
 end
 
 function dsu:check_fuel_amount()
@@ -337,25 +352,8 @@ function dsu:check_fuel_amount()
     self:show_fuel_alert({"no-fuel-in-network"})
 end
 
-function dsu:get_fuel_amount()
-    local box = self.entity.fluidbox[1]
-
-    return (box and box.amount) or 0
-end
-
 function dsu:remove_fuel(amount)
-    local fluidbox = self.entity.fluidbox
-    local box = fluidbox[1]
-
-    if not box then return end
-
-    box.amount = box.amount - amount
-
-    if box.amount <= 0 then
-        fluidbox[1] = nil
-    else
-        fluidbox[1] = box
-    end
+    self.entity.remove_fluid({name = get_fuel_fluid(), amount = amount})
 end
 
 --Drones
@@ -402,7 +400,7 @@ function dsu:update_drone_sticker()
         return
     end
 
-    if rendering1 and rendering.is_valid( rendering1 ) then
+    if rendering1 and rendering.is_valid(rendering1) then
         rendering.set_text(rendering1, self:get_active_drone_count() .. "/" .. self:get_drone_item_count())
 
         return
@@ -465,6 +463,8 @@ function dsu:make_request()
     if not name then return end
 
     if not self:can_spawn_drone() then return end
+
+    if self:get_fuel_amount() < fuel_amount_per_drone then return end
 
     local supply_depots = self.road_network.get_supply_depots(self.network_id, name)
 

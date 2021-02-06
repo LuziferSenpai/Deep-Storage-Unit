@@ -1,4 +1,4 @@
-local fuel_amount_per_drone = settings.startup["fuel-amount-per-drone"].value
+local fuel_amount_per_drone = shared.fuel_amount_per_drone
 local icon_param = { type = "virtual", name = "fuel-signal" }
 local assembling_input = defines.inventory.assembling_machine_input
 local mathmin = math.min
@@ -35,6 +35,16 @@ local is_valid_item = function(item_name)
     valid_item_cache[item_name] = game.item_prototypes[item_name] ~= nil
 
     return valid_item_cache[item_name]
+end
+
+local get_fuel_fluid = function()
+    if fuel_fluid then
+        return fuel_fluid
+    end
+
+    fuel_fluid = game.recipe_prototypes["fuel-depots"].products[1].name
+
+    return fuel_fluid
 end
 
 function dsu.new(entity)
@@ -121,7 +131,7 @@ function dsu:get_current_amount()
     return self.amount + self.entity.get_output_inventory().get_item_count(item)
 end
 
---DSU Item moving
+--*DSU Item moving
 function dsu:check_input()
     local item = self.item
 
@@ -191,7 +201,7 @@ function dsu:update_connector()
     end
 end
 
---Supplier
+--*Supplier
 function dsu:add_to_be_taken(name, count)
     self.to_be_taken[name] = (self.to_be_taken[name] or 0) + count
 end
@@ -269,7 +279,7 @@ function dsu:update_contents()
     self.old_contents = new_contents
 end
 
---Requester
+--*Requester
 --Fuel
 function dsu:minimum_fuel_amount()
     return mathmax(fuel_amount_per_drone * 2, fuel_amount_per_drone * self:get_drone_item_count() * 0.2)
@@ -283,6 +293,10 @@ function dsu:show_fuel_alert(message)
     for _, player in pairs(game.connected_players) do
         player.add_custom_alert(self.entity, icon_param, message , true)
     end
+end
+
+function dsu:get_fuel_amount()
+    return self.entity.get_fluid_count(get_fuel_fluid())
 end
 
 function dsu:check_fuel_amount()
@@ -315,25 +329,8 @@ function dsu:check_fuel_amount()
     self:show_fuel_alert({"no-fuel-in-network"})
 end
 
-function dsu:get_fuel_amount()
-    local box = self.entity.fluidbox[1]
-
-    return (box and box.amount) or 0
-end
-
 function dsu:remove_fuel(amount)
-    local fluidbox = self.entity.fluidbox
-    local box = fluidbox[1]
-
-    if not box then return end
-
-    box.amount = box.amount - amount
-
-    if box.amount <= 0 then
-        fluidbox[1] = nil
-    else
-        fluidbox[1] = box
-    end
+    self.entity.remove_fluid({name = get_fuel_fluid(), amount = amount})
 end
 
 --Drones
@@ -443,6 +440,8 @@ function dsu:make_request()
     if not name then return end
 
     if not self:can_spawn_drone() then return end
+
+    if self:get_fuel_amount() < fuel_amount_per_drone then return end
 
     local supply_depots = self.road_network.get_supply_depots(self.network_id, name)
 

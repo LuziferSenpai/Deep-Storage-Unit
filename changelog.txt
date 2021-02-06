@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.9
+Date: 06.02.2021
+  Bugfixes:
+    - Fixed the fail with the Transport Drones DSU
+    - Fixed the issue with launching drones, without fuel
+  Changes:
+    - Removed items and fluids from the storage, that shouldnt be there
+    - Removed the item and big text from the icons, it was just not useful
+---------------------------------------------------------------------------------------------------
 Version: 0.1.8
 Date: 26.01.2021
   Bugfixes:
