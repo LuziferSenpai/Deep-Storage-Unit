@@ -507,8 +507,23 @@ function dsu:on_removed()
 end
 
 function dsu:on_config_changed()
+    if not (self.rendering and self.rendering[1] and self.rendering[2]) then
+        if self.rendering and rendering.is_valid(self.rendering) then
+            rendering.destroy(self.rendering)
+        end
+
+        if self.rendering[1] and rendering.is_valid(self.rendering[1]) then
+            rendering.destroy(self.rendering[1])
+        end
+
+        if self.rendering[2] and rendering.is_valid(self.rendering[2]) then
+            rendering.destroy(self.rendering[2])
+        end
+
+        self.rendering = {}
+    end
+
     self.old_contents = self.old_contents or {}
-    self.rendering = {}
 
     if not self.connector then
         local entity = self.entity
